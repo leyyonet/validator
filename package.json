@@ -54,9 +54,10 @@
   "dependencies": {
     "@leyyo/common": "file:../common",
     "@leyyo/core": "file:../core",
+    "@leyyo/injection": "file:../injection",
     "@leyyo/error-enveloper": "^1.0.2",
     "@leyyo/scalar": "file:../scalar",
-    "@leyyo/call": "file:../call",
+    "@leyyo/http-call": "file:../http-call",
     "@leyyo/http": "file:../http",
     "validator": "^13.15.0"
   }

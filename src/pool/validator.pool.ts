@@ -12,7 +12,7 @@ import {
 } from "@leyyo/core";
 import {$assert, $descriptor, $dev, $is, $repo, ExceptionClass, List} from "@leyyo/common";
 import {FQN_PCK} from "../internal";
-import {callItem, callOption, CallParams, OptKeyCondition} from "@leyyo/call";
+import {callItem, callOption, CallParams, OptKeyCondition} from "@leyyo/http-call";
 import {
     GivenError,
     ValErrorAny,
@@ -67,12 +67,10 @@ class ValidatorPool implements ValidatorPoolLike {
         this._typeClassItems = $repo.newMap(FQN_PCK, 'typeClassItems');
         this._dtoPropertyItems = $repo.newMap(FQN_PCK, 'dtoPropertyItems');
 
-        lifecycle.onClear(50, 'PipePool', () => {
-            this._usedDecoratorInstances.clear();
-        })
-        lifecycle.onRedundant(50, 'PipePool', () => {
-            this._findRedundant();
-        })
+        lifecycle.onClear(FQN_PCK, () => {
+            this._findRedundant();;
+            this._usedDecoratorInstances.clear()
+        });
     }
 
     private _newCollection2d(): ValidatorItemCollection {
