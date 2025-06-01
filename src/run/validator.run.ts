@@ -303,7 +303,7 @@ class ValidatorRun implements ValidatorRunLike {
         current.failed = value => value ?? {};
     }
 
-    async forClass(clazz: ClassReflectionLike | Fnc | ClassLike, ctx: Ctx, value: Dict, prevField?: string): Promise<Array<ExceptionLike>> {
+    async runForClass(clazz: ClassReflectionLike | Fnc | ClassLike, ctx: Ctx, value: Dict, prevField?: string): Promise<Array<ExceptionLike>> {
         const result = [] as Array<ExceptionLike>;
         if (this._IGNORED.includes(clazz)) {
             return result;
@@ -369,20 +369,98 @@ class ValidatorRun implements ValidatorRunLike {
                 }
             }
             if (this._checkDeepTypes(fieldRef.type)) {
-                result.push(...await this.forClass(fieldRef.type as Fnc, ctx, value[f], field));
+                result.push(...await this.runForClass(fieldRef.type as Fnc, ctx, value[f], field));
             }
             const runtimeValue = value[f];
             if ($is.object(runtimeValue)) {
                 const runtimeType = (runtimeValue as Obj).constructor;
                 if (runtimeType !== fieldRef.type && this._checkDeepTypes(runtimeType)) {
-                    result.push(...await this.forClass(runtimeType as Fnc, ctx, runtimeValue, field));
+                    result.push(...await this.runForClass(runtimeType as Fnc, ctx, runtimeValue, field));
                 }
             }
         }
         return result;
     }
 
-    async forMethod(methodRef: PropertyReflectionLike, ctx: Ctx, values: Array<any>, ignoredIndexes: Array<number>): Promise<Array<any>> {
+    hasClass(clazz: ClassReflectionLike | Fnc | ClassLike): boolean {
+        if (this._IGNORED.includes(clazz)) {
+            return false;
+        }
+        let ref: ClassReflectionLike;
+        if (clazz instanceof ClassReflection) {
+            ref = clazz;
+        } else {
+            ref = reflectionPool.get(clazz, false);
+            if (!ref) {
+                return false;
+            }
+        }
+        const typeInfo = validatorIgnore.forType(ref);
+        if (typeInfo.all) {
+            return false;
+        }
+        const ignoredDecorators = typeInfo.decorators;
+
+        // for self
+        const selfItems = validatorPool.typeClassItems(ref);
+        if (selfItems.filter(item => !ignoredDecorators.includes(item.deco)).length > 0) {
+            return true;
+        }
+
+        // for properties
+        for (const fieldRef of this._fromFieldCache(ref)) {
+            const propItems = validatorPool.dtoPropertyItems(fieldRef);
+            if (propItems.filter(item => !ignoredDecorators.includes(item.deco)).length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    hasMethod(methodRef: PropertyReflectionLike, ignoredIndexes: Array<number>): boolean {
+        const paramRefList = methodRef.listParameters();
+        if (paramRefList.length < 1) {
+            return false;
+        }
+
+        const info = validatorPool.endpointInfo(methodRef);
+        if (!info.$any) {
+            return false;
+        }
+
+        const appInfo = validatorIgnore.forApplication();
+        if (appInfo.all) {
+            return false;
+        }
+        const controllerInfo = validatorIgnore.forController(methodRef.clazz);
+        if (controllerInfo.all) {
+            return false;
+        }
+        const selfInfo = validatorIgnore.forEndpoint(methodRef);
+        if (selfInfo.all) {
+            return false;
+        }
+        const ignoredDecorators = [...appInfo.decorators, ...controllerInfo.decorators, ...selfInfo.decorators];
+
+        for (const paramRef of paramRefList) {
+            if (ignoredIndexes.includes(paramRef.index)) {
+                continue;
+            }
+            const items = validatorPool.parameterItems(paramRef);
+            items.push(
+                ...validatorPool.applicationItems(paramRef.name),
+                ...validatorPool.controllerItems(methodRef.clazz, paramRef.name),
+                ...validatorPool.endpointItems(methodRef, paramRef.name)
+            );
+            if (items.filter(item => !ignoredDecorators.includes(item.deco)).length > 0) {
+                return true;
+            }
+            if (this._checkDeepTypes(paramRef.type) && this.hasClass(paramRef.type as Fnc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    async runForMethod(methodRef: PropertyReflectionLike, ctx: Ctx, values: Array<any>, ignoredIndexes: Array<number>): Promise<Array<any>> {
         const errors = [] as Array<ExceptionLike>;
 
         if (!Array.isArray(values)) {
@@ -447,13 +525,13 @@ class ValidatorRun implements ValidatorRunLike {
                 }
             }
             if (this._checkDeepTypes(paramRef.type)) {
-                errors.push(...await this.forClass(paramRef.type as Fnc, ctx, values[paramRef.index], field));
+                errors.push(...await this.runForClass(paramRef.type as Fnc, ctx, values[paramRef.index], field));
             }
             const runtimeValue = values[paramRef.index];
             if ($is.object(runtimeValue)) {
                 const runtimeType = (runtimeValue as Obj).constructor;
                 if (runtimeType !== paramRef.type && this._checkDeepTypes(runtimeType)) {
-                    errors.push(...await this.forClass(runtimeType as Fnc, ctx, runtimeValue, field));
+                    errors.push(...await this.runForClass(runtimeType as Fnc, ctx, runtimeValue, field));
                 }
             }
         }
