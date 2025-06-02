@@ -1,6 +1,6 @@
 import {decoratorPool} from "@leyyo/core";
 import {$assert, $dev, Dict, Func} from "@leyyo/common";
-import {FQN_PCK} from "../internal";
+import {FQN} from "../internal";
 import {validatorIgnore} from "./validator.ignore";
 import {IgnoreValidatorsOpt} from "./index.types";
 
@@ -19,7 +19,7 @@ export function IgnoreValidators(allOrDecorators: true | Array<Func | string> = 
 }
 
 const deco = decoratorPool.newId<IgnoreValidatorsOpt, Dict, P>(IgnoreValidators)
-    .fqn(FQN_PCK)
+    .fqn(FQN)
     .targets('class', 'method')
     .keywords('manageable')
     .processor((ins, p) => {

@@ -1,1 +1,1 @@
-export const FQN_PCK = 'leyyo.validator';
+export const FQN = 'leyyo.validator';

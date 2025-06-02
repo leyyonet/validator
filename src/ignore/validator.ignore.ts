@@ -10,11 +10,11 @@ import {
     PropertyReflectionLike
 } from "@leyyo/core";
 import {$descriptor, $dev, $repo, DevOpt, Func} from "@leyyo/common";
-import {FQN_PCK} from "../internal";
+import {FQN} from "../internal";
 import {IgnoredItem, IgnoreValidatorsOpt, ValidatorIgnoreLike} from "./index.types";
 import {httpSigner} from "@leyyo/http";
 
-@Fqn(FQN_PCK)
+@Fqn(FQN)
 class ValidatorIgnore implements ValidatorIgnoreLike {
     private readonly empty: IgnoredItem;
     private readonly application: IgnoredItem;
@@ -30,16 +30,16 @@ class ValidatorIgnore implements ValidatorIgnoreLike {
         this.empty = this._initPro();
         this.application = this._initPro();
 
-        this.controllers = $repo.newMap(FQN_PCK, 'ignored.controllers');
-        this.endpoints = $repo.newMap(FQN_PCK, 'ignored.endpoints');
-        this.types = $repo.newMap(FQN_PCK, 'ignored.types');
-        this.redundantMessages = $repo.newArray(FQN_PCK, 'ignored.redundant');
+        this.controllers = $repo.newMap(FQN, 'ignored.controllers');
+        this.endpoints = $repo.newMap(FQN, 'ignored.endpoints');
+        this.types = $repo.newMap(FQN, 'ignored.types');
+        this.redundantMessages = $repo.newArray(FQN, 'ignored.redundant');
 
-        this.temporaryClasses = $repo.newMap(FQN_PCK, 'temp.classes');
-        this.temporaryMethods = $repo.newMap(FQN_PCK, 'temp.methods');
+        this.temporaryClasses = $repo.newMap(FQN, 'temp.classes');
+        this.temporaryMethods = $repo.newMap(FQN, 'temp.methods');
 
-        lifecycle.onInitialize(FQN_PCK, () => this.initialize());
-        lifecycle.onClear(FQN_PCK, () => {
+        lifecycle.onInitialize(FQN, () => this.initialize());
+        lifecycle.onClear(FQN, () => {
             this._logRedundants()
             this.temporaryClasses.clear();
             this.temporaryMethods.clear();

@@ -30,7 +30,7 @@ import {
     CallWhenAsync,
     CallWhenSync
 } from "@leyyo/http-call";
-import {FQN_PCK} from "../internal";
+import {FQN} from "../internal";
 import {Ctx} from "@leyyo/http";
 import {validatorIgnore} from "../ignore";
 import {
@@ -42,7 +42,7 @@ import {
     validatorPool
 } from "../pool";
 
-@Fqn(FQN_PCK)
+@Fqn(FQN)
 class ValidatorRun implements ValidatorRunLike {
     private readonly _IGNORED = [String, Number, Date, Boolean, BigInt, Array, Object, Buffer, RegExp] as Array<any>;
     private readonly callOptionSecure: CallOptionProcessorSecure;
@@ -50,7 +50,7 @@ class ValidatorRun implements ValidatorRunLike {
 
     constructor() {
         this.callOptionSecure = callOption.$secure;
-        this.cachedProperties = $repo.newMap(FQN_PCK, 'cachedProperties');
+        this.cachedProperties = $repo.newMap(FQN, 'cachedProperties');
     }
 
 

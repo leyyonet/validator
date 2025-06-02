@@ -1,6 +1,6 @@
 import {Fqn} from "@leyyo/core";
 import {Loader} from "@leyyo/injection";
-import {FQN_PCK} from "./internal";
+import {FQN} from "./internal";
 import {validatorIgnore} from "./ignore";
 import {validatorPool} from "./pool";
 import {validatorRun} from "./run";
@@ -8,6 +8,6 @@ import {validatorRun} from "./run";
 @Loader(
     validatorIgnore, validatorPool, validatorRun,
 )
-@Fqn(FQN_PCK)
+@Fqn(FQN)
 export class ValidatorLoader {
 }

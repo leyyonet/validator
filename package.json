@@ -54,6 +54,7 @@
   "dependencies": {
     "@leyyo/common": "file:../common",
     "@leyyo/core": "file:../core",
+    "@leyyo/cast": "file:../cast",
     "@leyyo/injection": "file:../injection",
     "@leyyo/error-enveloper": "^1.0.2",
     "@leyyo/scalar": "file:../scalar",
